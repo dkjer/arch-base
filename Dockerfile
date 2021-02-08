@@ -24,7 +24,7 @@ RUN ["/bootstrap/busybox", "--install", "-s", "/bootstrap"]
 # once the tarball is extracted we then use bash to execute the install script to
 # install everything else for the base image.
 # note, do not line wrap the below command, as it will fail looking for /bin/sh
-RUN ["/bootstrap/sh", "-c", "rel_date=$(/bootstrap/date +%Y.%m.01) && /bootstrap/wget --timeout=60 -O /bootstrap/archlinux.tar.gz http://archlinux.de-labrusse.fr/iso/latest/archlinux-bootstrap-${rel_date}-x86_64.tar.gz && /bootstrap/tar --exclude=root.x86_64/etc/resolv.conf --exclude=root.x86_64/etc/hosts -xvf /bootstrap/archlinux.tar.gz --strip-components=1 -C / && /bin/bash -c 'chmod +x /root/*.sh && /bin/bash /root/install.sh'"]
+RUN ["/bootstrap/sh", "-c", "rel_date=2021.01.01 && echo $rel_date && /bootstrap/wget --timeout=60 -O /bootstrap/archlinux.tar.gz http://mirror.sfo12.us.leaseweb.net/archlinux/iso/latest/archlinux-bootstrap-${rel_date}-x86_64.tar.gz && /bootstrap/tar --exclude=root.x86_64/etc/resolv.conf --exclude=root.x86_64/etc/hosts -xvf /bootstrap/archlinux.tar.gz --strip-components=1 -C / && /bin/bash -c 'chmod +x /root/*.sh && /bin/bash /root/install.sh'"]
 
 # env
 #####
@@ -41,5 +41,8 @@ ENV LANG en_GB.UTF-8
 # run
 #####
 
+# This is no longer needed.  Just run docker run with --init option.
 # run tini to manage graceful exit and zombie reaping
-ENTRYPOINT ["/usr/bin/tini", "-g", "--"]
+#ENTRYPOINT ["/usr/bin/tini", "-g", "--"]
+
+CMD ["/bin/bash"]

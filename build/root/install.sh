@@ -114,7 +114,7 @@ echo "[info] Updating packages currently installed..."
 pacman -Syu --noconfirm 
 
 echo "[info] Install base group and additional packages..."
-pacman -S base awk sed grep gzip supervisor nano vi ldns moreutils net-tools dos2unix unzip unrar htop jq openssl-1.0 --noconfirm
+pacman -S base awk sed grep gzip supervisor nano vim ldns moreutils net-tools dos2unix unzip unrar htop jq openssl-1.0 --noconfirm
 
 echo "[info] set locale..."
 echo en_GB.UTF-8 UTF-8 > '/etc/locale.gen'
@@ -138,23 +138,25 @@ usermod -d /home/nobody nobody
 # set shell for user nobody
 chsh -s /bin/bash nobody
  
-# delme once fixed!!
-# force downgrade of coreutils - fixes permission denied issue when building on docker hub
-# https://gitlab.archlinux.org/archlinux/archlinux-docker/-/issues/32
-curl --connect-timeout 5 --max-time 600 --retry 5 --retry-delay 0 --retry-max-time 60 -o /tmp/coreutils.tar.xz -L "https://github.com/binhex/arch-packages/raw/master/compiled/x86-64/coreutils.tar.xz"
-pacman -U '/tmp/coreutils.tar.xz' --noconfirm
-# /delme once fixed!!
+# Lets not download pre-compiled binaries...
+## delme once fixed!!
+## force downgrade of coreutils - fixes permission denied issue when building on docker hub
+## https://gitlab.archlinux.org/archlinux/archlinux-docker/-/issues/32
+#curl --connect-timeout 5 --max-time 600 --retry 5 --retry-delay 0 --retry-max-time 60 -o /tmp/coreutils.tar.xz -L "https://github.com/binhex/arch-packages/raw/master/compiled/x86-64/coreutils.tar.xz"
+#pacman -U '/tmp/coreutils.tar.xz' --noconfirm
+## /delme once fixed!!
+#
+## force re-install of ncurses 6.x with 5.x backwards compatibility (can be removed once all apps have switched over to ncurses 6.x)
+#curl --connect-timeout 5 --max-time 600 --retry 5 --retry-delay 0 --retry-max-time 60 -o /tmp/ncurses5-compat.tar.xz -L "https://github.com/binhex/arch-packages/raw/master/compiled/x86-64/ncurses5-compat-libs.tar.xz"
+#pacman -U '/tmp/ncurses5-compat.tar.xz' --noconfirm
 
-# force re-install of ncurses 6.x with 5.x backwards compatibility (can be removed once all apps have switched over to ncurses 6.x)
-curl --connect-timeout 5 --max-time 600 --retry 5 --retry-delay 0 --retry-max-time 60 -o /tmp/ncurses5-compat.tar.xz -L "https://github.com/binhex/arch-packages/raw/master/compiled/x86-64/ncurses5-compat-libs.tar.xz"
-pacman -U '/tmp/ncurses5-compat.tar.xz' --noconfirm
-
-# find latest tini release tag from github
-curl --connect-timeout 5 --max-time 600 --retry 5 --retry-delay 0 --retry-max-time 60 -o /tmp/tini_release_tag -L "https://github.com/krallin/tini/releases"
-tini_release_tag=$(cat /tmp/tini_release_tag | grep -P -o -m 1 '(?<=/krallin/tini/releases/tag/)[^"]+')
-
-# download tini, used to do graceful exit when docker stop issued and correct reaping of zombie processes.
-curl --connect-timeout 5 --max-time 600 --retry 5 --retry-delay 0 --retry-max-time 60 -o /usr/bin/tini -L "https://github.com/krallin/tini/releases/download/${tini_release_tag}/tini-amd64" && chmod +x /usr/bin/tini
+# tini should no longer be needed. It is part of docker v1.13 or greater (--init flag)
+## find latest tini release tag from github
+#curl --connect-timeout 5 --max-time 600 --retry 5 --retry-delay 0 --retry-max-time 60 -o /tmp/tini_release_tag -L "https://github.com/krallin/tini/releases"
+#tini_release_tag=$(cat /tmp/tini_release_tag | grep -P -o -m 1 '(?<=/krallin/tini/releases/tag/)[^"]+')
+#
+## download tini, used to do graceful exit when docker stop issued and correct reaping of zombie processes.
+#curl --connect-timeout 5 --max-time 600 --retry 5 --retry-delay 0 --retry-max-time 60 -o /usr/bin/tini -L "https://github.com/krallin/tini/releases/download/${tini_release_tag}/tini-amd64" && chmod +x /usr/bin/tini
 
 # identify if base-devel package installed
 if pacman -Qg "base-devel" > /dev/null ; then
@@ -164,7 +166,7 @@ if pacman -Qg "base-devel" > /dev/null ; then
 
 fi
 
-# remove any build tools that maybe present from the build
+# remove any build tools that may be present from the build
 pacman -Ru dotnet-sdk yarn git yay-bin reflector gcc binutils --noconfirm 2> /dev/null || true
 
 # general cleanup
